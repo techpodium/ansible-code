@@ -1,0 +1,8 @@
+---
+
+- hosts: jenkins_hosts
+  become: yes
+  vars:
+    # list of variable specific to this play should go here
+  roles:
+    - jenkins
