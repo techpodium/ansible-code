@@ -1,0 +1,93 @@
+---
+
+# rds facts command does not support for automated snapshots
+# https://github.com/ansible/ansible/issues/29504
+- name: Verify the snapshot
+  rds:
+    command: facts
+    snapshot: "{{ rds_snapshot_name }}"
+    region: "{{ aws_region }}"
+  register: snapshot_facts
+
+- name: Terminate current instances
+  rds:
+    command: delete
+    region: "{{ aws_region }}"
+    instance_name: "{{ host_environment }}-{{ instance_name }}-rds"
+    snapshot: "{{ host_environment }}-{{ instance_name }}-rds-snapshot-{{ date }}"
+    wait: yes
+    wait_timeout: 1800
+  when: snapshot_facts.instance.id == rds_snapshot_name
+
+- name: Restore AWS RDS instance from snapshot {{ rds_snapshot_name }}
+  rds:
+    command: restore
+    snapshot: "{{ rds_snapshot_name }}"
+    instance_name: "{{ host_environment }}-{{ instance_name }}-rds"
+    region: "{{ aws_region }}"
+    subnet: "{{ host_environment }}-rds-subnet-group"
+    wait: yes
+    wait_timeout: 1200
+  register: launched_rds
+  when: snapshot_facts.instance.id == rds_snapshot_name
+
+- debug:
+    msg: "The restored db endpoint is {{ launched_rds.instance.endpoint }}"
+
+- name: gather vpc facts
+  ec2_vpc_net_facts:
+    filters:
+      "tag:Name": "{{ vpc_name }}"
+    region: "{{ aws_region }}"
+  register: vpc_facts
+
+- name: Set VPC ID in variable
+  set_fact:
+    my_vpc: "{{ vpc_facts.vpcs[0] }}"
+
+- name: gather security group facts
+  ec2_group_facts:
+    filters:
+      vpc-id: "{{ my_vpc.id }}"
+      group-name: "{{ host_environment }}-rds*"
+    region: "{{ aws_region }}"
+  register: sg_facts
+
+- name: found security group for rds
+  debug:
+    msg: "{{ sg_facts }}"
+
+- name: Modify restored RDS instance to use correct security group
+  rds:
+    command: modify
+    instance_name: "{{ host_environment }}-{{ instance_name }}-rds"
+    region: "{{ aws_region }}"
+    vpc_security_groups: "{{ sg_facts.security_groups[0].group_id }}"
+    wait: yes
+
+- name: Modify restored RDS instance to use correct parameter group
+  rds:
+    command: modify
+    instance_name: "{{ host_environment }}-{{ instance_name }}-rds"
+    region: "{{ aws_region }}"
+    parameter_group: "{{ host_environment }}-rds-parameter-group"
+    wait: yes
+    wait_timeout: 1200
+
+- name: reboot the rds
+  rds:
+    command: reboot
+    instance_name: "{{ host_environment }}-{{ instance_name }}-rds"
+    region: "{{ aws_region }}"
+
+- name: Update route53 private zone record for rds endpoint
+  route53:
+    command:      create
+    overwrite:    yes
+    private_zone: yes
+    record:       "{{ host_environment }}-rds-{{ instance_name }}.internal.{{ vpc_name }}.{{ route53_top_zone }}"
+    ttl:          300
+    type:         CNAME
+    value:        "{{ launched_rds.instance.endpoint }}"
+    zone:         "internal.{{ vpc_name }}.{{ route53_top_zone }}"
+  when: launched_rds.changed

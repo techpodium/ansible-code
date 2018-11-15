@@ -1,0 +1,5 @@
+---
+
+# We need this to import large amount of data (i.e. executing large sql query)
+param_max_allowed_packet: 104857600
+date: "{{ ansible_date_time.year }}-{{ ansible_date_time.month }}-{{ ansible_date_time.day }}-{{ ansible_date_time.hour }}-{{ ansible_date_time.minute }}"

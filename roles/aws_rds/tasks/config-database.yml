@@ -1,0 +1,24 @@
+- name: Create a new database named {{ schema.db_name }}
+  mysql_db:
+    name: "{{ schema.db_name }}"
+    login_host: "{{ host_environment }}-rds-{{ config_instance.name }}.internal.{{ vpc_name }}.{{ route53_top_zone }}"
+    login_user: "{{ rds.master_db_username }}"
+    login_password: "{{ rds.master_db_password }}"
+    state: present
+  when: schema.db_name != '*'
+  register: dbcreated
+
+# We may need to create the DB user only, thats why here no condition is used
+- name: Create database user {{ schema.user }} for {{ schema.db_name }} DB
+  mysql_user:
+    login_host: "{{ host_environment }}-rds-{{ config_instance.name }}.internal.{{ vpc_name }}.{{ route53_top_zone }}"
+    login_user: "{{ rds.master_db_username }}"
+    login_password: "{{ rds.master_db_password }}"
+    host: "%"
+    name: "{{ schema.user }}"
+    password: "{{ schema.password }}"
+    priv: "{% if schema.db_name != '*' %}`{{ schema.db_name }}`{% else %}*{% endif %}.*:{{ schema.privilege }}"
+    append_privs: yes
+    state: present
+
+# Importing Database dump tasks may require

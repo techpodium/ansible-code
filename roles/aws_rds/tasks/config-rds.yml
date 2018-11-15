@@ -1,0 +1,7 @@
+---
+
+- include: config-database.yml
+  with_items: "{{ config_instance.rds_database_schemas }}"
+  loop_control:
+    loop_var: schema
+  when: config_instance.config_now

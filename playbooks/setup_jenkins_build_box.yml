@@ -1,5 +1,7 @@
 ---
 
+# Note: Inventory is not defined, so this playbook will not work
+
 - hosts: jenkins_hosts
   become: yes
   vars:

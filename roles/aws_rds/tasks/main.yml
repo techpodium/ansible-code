@@ -1,0 +1,38 @@
+---
+
+# Note: This role is very customized for specific purpose
+
+- include_tasks: create-rds.yml
+  with_items: "{{ rds_instances }}"
+  loop_control:
+    loop_var: new_instance
+  when: rds_action == 'create'
+
+- name: ensure mysql lib is installed
+  apt:
+    name: default-libmysqlclient-dev
+    state: present
+  become: yes
+  when: rds_action == 'config'
+
+- name: install dependency to use ansible rds plugins
+  pip:
+    name: MySQL-python
+    state: present
+  become: yes
+  when: rds_action == 'config'
+
+- include_tasks: config-rds.yml
+  with_items: "{{ rds_instances }}"
+  loop_control:
+    loop_var: config_instance
+  when: rds_action == 'config'
+
+- include_tasks: restore-rds.yml
+  when: rds_action == 'restore'
+
+- include_tasks: destroy-rds.yml
+  with_items: "{{ rds_instances }}"
+  loop_control:
+    loop_var: del_instance
+  when: rds_action == 'destroy'

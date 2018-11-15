@@ -1,0 +1,107 @@
+---
+
+- name: gather vpc facts
+  ec2_vpc_net_facts:
+    filters:
+      "tag:Name": "{{ vpc_name }}"
+    region: "{{ aws_region }}"
+  register: vpc_facts
+
+- name: Set VPC ID in variable
+  set_fact:
+    my_vpc: "{{ vpc_facts.vpcs[0] }}"
+
+- name: gather subnets facts
+  ec2_vpc_subnet_facts:
+    filters:
+      vpc-id: "{{ my_vpc.id }}"
+      "tag:Name": "private_*"
+    region: "{{ aws_region }}"
+  register: subnets_facts
+
+- name: found private subnets
+  debug:
+    msg: "{{ subnets_facts }}"
+
+- name: gather security group facts
+  ec2_group_facts:
+    filters:
+      vpc-id: "{{ my_vpc.id }}"
+      group-name: "{{ host_environment }}-rds*"
+    region: "{{ aws_region }}"
+  register: sg_facts
+
+- name: found security group for rds
+  debug:
+    msg: "{{ sg_facts }}"
+
+- name: Create RDS Subnet Group
+  rds_subnet_group:
+    state: present
+    region: "{{ aws_region }}"
+    name: "{{ host_environment }}-rds-subnet-group"
+    description: "{{ host_environment }} rds subnet group"
+    subnets:
+      - "{{ subnets_facts.subnets[0].id }}"
+      - "{{ subnets_facts.subnets[1].id }}"
+  register: subnet_group
+
+- debug:
+    var: subnet_group
+
+- name: Create RDS Parameter Group
+  rds_param_group:
+    state: present
+    region: "{{ aws_region }}"
+    name: "{{ host_environment }}-rds-parameter-group"
+    description: "{{ host_environment }} rds parameter_group"
+    engine: "{{ new_instance.engine_version }}"
+    params:
+      max_allowed_packet: "{{ param_max_allowed_packet }}"
+  register: parameter_group
+
+- debug:
+    var: parameter_group
+
+- name: Create RDS Instance
+  rds:
+    command: create
+    region: "{{ aws_region }}"
+    instance_name: "{{ host_environment }}-rds-{{ new_instance.name }}"
+    instance_type: "{{ new_instance.instance_type }}"
+    db_engine: "{{ new_instance.db_engine }}"
+    port: "{{ new_instance.port }}"
+    size: "{{ new_instance.instance_size }}"
+    db_name: "wp{{ host_environment }}"
+    username: "{{ rds.master_db_username }}"
+    password: "{{ rds.master_db_password }}"
+    parameter_group: "{{ host_environment }}-rds-parameter-group"
+    publicly_accessible: "{{ new_instance.is_publicly_accessible }}"
+    vpc_security_groups: "{{ sg_facts.security_groups[0].group_id }}"
+    subnet: "{{ host_environment }}-rds-subnet-group"
+    multi_zone: "{{ new_instance.is_multi_az_deployment }}"
+    zone: "{{ subnets_facts.subnets[0].availability_zone }}"
+    maint_window: "{{ new_instance.preferred_maintenance_window }}"
+    backup_retention: "{{ new_instance.backup_retention_period }}"
+    backup_window: "{{ new_instance.preferred_backup_window }}"
+    wait: yes
+    wait_timeout: 1200
+    tags:
+      Environment: "{{ host_environment }}"
+      Name: "{{ host_environment }}-{{ new_instance.name }}-rds"
+  register: rds_instance
+
+- debug:
+    msg: "The new db endpoint is {{ rds_instance.instance.endpoint }}"
+
+- name: Update route53 private zone record for rds endpoint
+  route53:
+    command:      create
+    overwrite:    yes
+    private_zone: yes
+    record:       "{{ host_environment }}-rds-{{ new_instance.name }}.internal.{{ vpc_name }}.{{ route53_top_zone }}"
+    ttl:          300
+    type:         CNAME
+    value:        "{{ rds_instance.instance.endpoint }}"
+    zone:         "internal.{{ vpc_name }}.{{ route53_top_zone }}"
+  when: rds_instance.changed

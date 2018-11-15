@@ -1,0 +1,33 @@
+---
+
+- name: gather rds facts
+  rds:
+    command: facts
+    region: "{{ aws_region }}"
+    instance_name: "{{ host_environment }}-{{ del_instance.name }}-rds"
+  register: rds_facts
+
+- debug:
+    var: rds_facts
+
+- name: take snapshot and destory rds
+  rds:
+    command: delete
+    region: "{{ aws_region }}"
+    instance_name: "{{ host_environment }}-{{ del_instance.name }}-rds"
+    snapshot: "{{ host_environment }}-{{ del_instance.name }}-rds-snapshot-{{ date }}"
+    wait: yes
+    wait_timeout: 1200
+
+# Commenting out as same subnet-group and parameter-group are used for all RDS Instances
+# - name: remove subnet group
+#   rds_subnet_group:
+#     state: absent
+#     region: "{{ aws_region }}"
+#     name: "{{ host_environment }}-rds-subnet-group"
+
+# - name: remove parameter group
+#   rds_param_group:
+#     state: absent
+#     region: "{{ aws_region }}"
+#     name: "{{ host_environment }}-rds-parameter-group"
