@@ -1,0 +1,121 @@
+jenkins_user: "{{ jenkins.admin_username }}"
+jenkins_password: "{{ jenkins.admin_password }}"
+
+# plugin order is important (make sure all the dependencies of a plugin you want are listed ABOVE it in this list or it might not install)
+jenkins_plugins:
+  - name: ansible
+    state: present
+  - name: amazon-ecr
+    state: present
+  - name: aws-credentials
+    state: present
+  - name: credentials
+    state: present
+  - name: plain-credentials
+    state: present
+  - name: matrix-auth
+    state: present
+  - name: extended-choice-parameter
+    state: present
+  - name: git
+    state: present
+  - name: github
+    state: present
+  - name: github-api
+    state: present
+  - name: ldap
+    state: present
+  - name: pipeline-build-step
+    state: present
+  - name: pipeline-milestone-step
+    state: present
+  - name: pipeline-multibranch-defaults
+    state: present
+  - name: workflow-aggregator
+    state: present
+  - name: ghprb
+    state: present
+  - name: vagrant
+    state: present
+  - name: ssh-slaves
+    state: present
+  - name: ssh-credentials
+    state: present
+  - name: parameterized-trigger
+    state: present
+  - name: downstream-buildview
+    state: present
+  - name: build-pipeline-plugin
+    state: present
+  - name: envinject
+    state: present
+  - name: ws-cleanup
+    state: present
+  - name: promoted-builds
+    state: present
+  - name: slack
+    state: present
+  - name: copyartifact
+    state: present
+  - name: delivery-pipeline-plugin
+    state: present
+  - name: groovy
+    state: present
+  - name: uno-choice
+    state: present
+  - name: Parameterized-Remote-Trigger
+    state: present
+  - name: blueocean-commons
+    state: present
+  - name: blueocean-personalization
+    state: present
+  - name: blueocean-config
+    state: present
+  - name: blueocean-dashboard
+    state: present
+  - name: blueocean-events
+    state: present
+  - name: blueocean-git-pipeline
+    state: present
+  - name: blueocean-github-pipeline
+    state: present
+  - name: blueocean-i18n
+    state: present
+  - name: blueocean-jira
+    state: present
+  - name: blueocean-jwt
+    state: present
+  - name: blueocean-bitbucket-pipeline
+    state: present
+  - name: blueocean-pipeline-api-impl
+    state: present
+  - name: blueocean-pipeline-editor
+    state: present
+  - name: blueocean-rest
+    state: present
+  - name: blueocean-rest-impl
+    state: present
+  - name: blueocean-web
+    state: present
+  - name: blueocean-autofavorite
+    state: present
+  - name: blueocean-display-url
+    state: present
+  - name: blueocean
+    state: present
+  - name: nodejs
+    state: present
+  - name: pipeline-utility-steps
+    state: present
+  - name: pipeline-aws
+    state: present
+  - name: checkstyle
+    state: present
+  - name: cobertura
+    state: present
+  - name: cucumber-reports
+    state: present
+  - name: xvfb
+    state: present
+  - name: build-user-vars-plugin
+    state: present

@@ -1,0 +1,15 @@
+---
+- name: restart jenkins
+  service:
+    name: jenkins
+    state: restarted
+
+- name: reload-configuration jenkins
+  # Discard all the loaded data in memory and reload everything from file system. Useful when you modified config files directly on disk.
+  # NOTE: But didnt work as expected
+  command: "java -jar {{ jenkins.cli_jar_location }} -s http://localhost:8080 reload-configuration  --username {{ jenkins_user }} --password {{ jenkins_password }}"
+
+- name: safe-restart jenkins
+  # Safely restart Jenkins. Puts Jenkins into the quiet mode(In quiet mode Jenkins don’t start any build), wait for existing builds to be completed, and then restart Jenkins
+  # Reference: https://support.cloudbees.com/hc/en-us/articles/216118748-How-to-Start-Stop-or-Restart-your-Instance-
+  command: "java -jar {{ jenkins.cli_jar_location }} -s http://localhost:8080 safe-restart  --username {{ jenkins_user }} --password {{ jenkins_password }}"

@@ -1,0 +1,137 @@
+---
+
+- name: Add the package signing key
+  apt_key:
+    url: https://pkg.jenkins.io/debian-stable/jenkins.io.key
+    state: present
+
+- name: Add the repository config
+  apt_repository:
+    repo: deb https://pkg.jenkins.io/debian-stable binary/
+    update_cache: yes
+    state: present
+
+- name: install jenkins
+  apt:
+    pkg: "{{ pkg_name }}"
+    state: present
+  with_items:
+    - jenkins
+    - groovy
+  loop_control:
+    loop_var: pkg_name
+
+- name: Create custom init scripts directory.
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: jenkins
+    group: "{{ jenkins.group }}"
+    mode: 0775
+  with_items:
+    - /var/lib/jenkins/init.groovy.d
+    - /var/lib/jenkins/tools
+
+- name: Preapproval for known scripts
+  template:
+    src: scriptApproval.xml
+    dest: /var/lib/jenkins/scriptApproval.xml
+    owner: jenkins
+    group: "{{ jenkins.group }}"
+    mode: 0775
+
+- name: Confiure for Maven
+  template:
+    src: hudson.tasks.Maven.xml.j2
+    dest: /var/lib/jenkins/hudson.tasks.Maven.xml
+    owner: jenkins
+    group: "{{ jenkins.group }}"
+    mode: 0775
+
+- name: configure default users
+  template:
+    src: basic-security.groovy
+    dest: /var/lib/jenkins/init.groovy.d/basic-security.groovy
+    owner: jenkins
+    group: "{{ jenkins.group }}"
+    mode: 0775
+  notify: safe-restart jenkins
+
+- name: Get the jenkins-cli jarfile from the Jenkins server
+  get_url:
+    url: "{{ jenkins.master.node_url }}/jnlpJars/jenkins-cli.jar"
+    dest: /opt/jenkins-cli.jar
+  register: jarfile_get
+  until: "'OK' in jarfile_get.msg or 'file already exists' in jarfile_get.msg"
+  retries: 5
+  delay: 10
+  check_mode: no
+
+- name: Remove Jenkins security init scripts after first startup.
+  file:
+    path: /var/lib/jenkins/init.groovy.d/basic-security.groovy
+    state: absent
+
+- name: Get the CSRF protection token (CRUMB)
+  shell: "wget -q --auth-no-challenge --user {{ jenkins_user }} --password '{{ jenkins_password }}' --output-document - '{{ jenkins.master.node_url }}/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,\":\",//crumb)'"
+  register: crumb
+
+- name: setting crumb token, it looks like this- Jenkins-Crumb:<a-token-string>
+  set_fact:
+    crumb_token: "{% if crumb.stdout and crumb.stdout is defined %}{{ crumb.stdout }}{% endif %}"
+
+- name: Install Jenkins plugins using password.
+  jenkins_plugin:
+    name: "{{ item.name }}"
+    jenkins_home: /var/lib/jenkins
+    url_username: "{{ jenkins_user }}"
+    url_password: "{{ jenkins_password }}"
+    state: "{{ item.state }}"
+    timeout: 45
+    url: http://localhost:8080
+  with_items: "{{ jenkins_plugins }}"
+  notify: safe-restart jenkins
+
+- name: ends up the install wizard
+  copy:
+    remote_src: yes
+    dest: /var/lib/jenkins/jenkins.install.InstallUtil.lastExecVersion
+    src: /var/lib/jenkins/jenkins.install.UpgradeWizard.state
+
+- name: Immediately restart Jenkins after ends up installation
+  service:
+    name: jenkins
+    state: restarted
+
+- name: Wait for Jenkins to start up before proceeding.
+  uri:
+    url: http://localhost:8080/cli/
+    return_content: yes
+    status_code: "200,403"
+  register: result
+  until: (result.status == 200 or result.status == 403) and ("Please wait while" not in result.content)
+  retries: 5
+  delay: 10
+  changed_when: false
+  check_mode: no
+
+- name: generate credentials
+  include_tasks: credentials.yml
+  with_items: "{{ jenkins.credentials }}"
+  loop_control:
+    loop_var: credential
+
+- include_tasks: slave-integration.yml
+  with_items: "{{ jenkins.slaves }}"
+  loop_control:
+    loop_var: slave_node
+
+- name: Approve ansiblized groovy scripts
+  template:
+    src: scripts/script-approval.groovy
+    dest: /var/lib/jenkins/init.groovy.d/script-approval.groovy
+    owner: jenkins
+    group: "{{ jenkins.group }}"
+    mode: 0775
+  register: script_approval_config
+  notify: safe-restart jenkins

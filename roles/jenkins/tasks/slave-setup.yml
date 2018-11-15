@@ -1,0 +1,18 @@
+---
+
+- name: create authorized_keys file
+  file:
+    path: /var/lib/jenkins/.ssh/authorized_keys
+    state: touch
+    owner: jenkins
+    group: "{{ jenkins.group }}"
+    mode: 0644
+
+- name: Copy SSH public-key into variable
+  command: "cat /var/lib/jenkins/.ssh/id_rsa.pub"
+  register: pubKey
+
+- name: Do an entry of SSH public-key to authorized_keys file
+  lineinfile:
+    path: /var/lib/jenkins/.ssh/authorized_keys
+    line: "{{ pubKey.stdout }}"

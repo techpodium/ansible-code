@@ -1,0 +1,18 @@
+<slave>
+  <name>{{ slave_node.node_name }}</name>
+  <description>{{ slave_node.description }}</description>
+  <remoteFS>{{ slave_node.remote_root_dir }}</remoteFS>
+  <numExecutors>{{ slave_node.executors }}</numExecutors>
+  <mode>NORMAL</mode>
+  <retentionStrategy class="hudson.slaves.RetentionStrategy$Always"/>
+  <launcher class="hudson.plugins.sshslaves.SSHLauncher" plugin="ssh-slaves@1.5">
+    <host>{{ slave_node.host_name }}</host>
+    <port>22</port>
+    <credentialsId>{{ slave_node.credentials_id|to_uuid }}</credentialsId>
+    <maxNumRetries>5</maxNumRetries>
+    <retryWaitTime>3</retryWaitTime>
+    <sshHostKeyVerificationStrategy class="hudson.plugins.sshslaves.verifiers.KnownHostsFileKeyVerificationStrategy"/>
+  </launcher>
+  <label>{{ slave_node.label }}</label>
+  <nodeProperties/>
+</slave>

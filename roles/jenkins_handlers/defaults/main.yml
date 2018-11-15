@@ -1,0 +1,4 @@
+---
+
+jenkins_user: "{{ jenkins.admin_username }}"
+jenkins_password: "{{ jenkins.admin_password }}"

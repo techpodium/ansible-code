@@ -1,0 +1,9 @@
+---
+
+- include_tasks: base.yml
+
+- include_tasks: slave-setup.yml
+  when: (ec2_tag_jenkins_slave is defined and ec2_tag_jenkins_slave) or (ansible_hostname | search("jenkins-slave-.*"))
+
+- include_tasks: master-setup.yml
+  when: (ec2_tag_jenkins_master is defined and ec2_tag_jenkins_master) or (ansible_hostname | search("jenkins-master"))

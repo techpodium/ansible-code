@@ -1,0 +1,14 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<org.jenkinsci.plugins.ParameterizedRemoteTrigger.RemoteBuildConfiguration_-DescriptorImpl plugin="Parameterized-Remote-Trigger@3.0.0">
+  <remoteSites>
+    <org.jenkinsci.plugins.ParameterizedRemoteTrigger.RemoteJenkinsServer>
+      <displayName>{{ jenkins.remote_job_trigger.config_display }}</displayName>
+      <hasBuildTokenRootSupport>false</hasBuildTokenRootSupport>
+      <auth2 class="org.jenkinsci.plugins.ParameterizedRemoteTrigger.auth2.TokenAuth">
+        <userName>{{ jenkins.remote_job_trigger.user_name }}</userName>
+        <apiToken>{{ jenkins.remote_job_trigger.api_token }}</apiToken>
+      </auth2>
+      <address>{{ jenkins.remote_job_trigger.server_url }}/</address>
+    </org.jenkinsci.plugins.ParameterizedRemoteTrigger.RemoteJenkinsServer>
+  </remoteSites>
+</org.jenkinsci.plugins.ParameterizedRemoteTrigger.RemoteBuildConfiguration_-DescriptorImpl>

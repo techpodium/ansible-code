@@ -1,0 +1,29 @@
+---
+- name: get ssh-rsa host-key for agent {{ slave_node.node_name }}
+  shell: "ssh-keyscan -t 'ssh-rsa' {{ slave_node.host_name }}"
+  register: agent_host_key
+
+- name: add host-key into known_hosts file
+  lineinfile:
+    path: /var/lib/jenkins/.ssh/known_hosts
+    line: "{{ agent_host_key.stdout }}"
+  when: agent_host_key.stdout and agent_host_key.stdout is defined
+
+- block:
+  - name: check if slave {{ slave_node.node_name }} exist on master
+    uri:
+      url: "{{ jenkins.master.node_url }}/computer/{{ slave_node.node_name }}/api/json"
+      method: POST
+      user: "{{ jenkins_user }}"
+      password: "{{ jenkins_password }}"
+      headers:
+        Jenkins-Crumb: "{{ crumb_token.split(':')[1] }}"
+      force_basic_auth: yes
+      status_code: "200,404"
+    register: nodestate
+
+  - name: Add new slave {{ slave_node.node_name }} on master
+    shell: "curl -u {{ jenkins_user }}:{{ jenkins_password }} -H {{ crumb_token }} -X POST --data-urlencode json='{ \"name\": \"{{ slave_node.node_name }}\", \"nodeDescription\": \"{{ slave_node.description }}\", \"numExecutors\": \"{{ slave_node.executors }}\", \"remoteFS\": \"{{ slave_node.remote_root_dir }}\", \"labelString\": \"{{ slave_node.label }}\", \"mode\": \"NORMAL\", \"launcher\": { \"stapler-class\": \"hudson.plugins.sshslaves.SSHLauncher\", \"class\": \"hudson.plugins.sshslaves.SSHLauncher\", \"host\": \"{{ slave_node.host_name }}\", \"credentialsId\": \"{{ slave_node.credentials_id|to_uuid }}\", \"port\": \"22\", \"sshHostKeyVerificationStrategy\": { \"stapler-class\": \"hudson.plugins.sshslaves.verifiers.KnownHostsFileKeyVerificationStrategy\", \"class\": \"hudson.plugins.sshslaves.verifiers.KnownHostsFileKeyVerificationStrategy\" }}}' \"{{ jenkins.master.node_url }}/computer/doCreateItem?name={{ slave_node.node_name }}&type=hudson.slaves.DumbSlave\""
+    when: nodestate.status == 404
+
+  when: agent_host_key.stdout and agent_host_key.stdout is defined

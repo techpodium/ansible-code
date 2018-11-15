@@ -1,0 +1,115 @@
+---
+- name: install required packages
+  apt:
+    pkg: "{{ item }}"
+    state: present
+  with_items:
+    - openjdk-8-jdk
+    - git
+    - python-pip
+    - jq
+    - debootstrap
+    - reprepro
+
+- name: lock jdk version
+  command: "apt-mark hold openjdk-8-jdk"
+
+- name: install pyOpenSSL
+  pip:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - pyopenssl
+    - python-jenkins
+    - lxml
+
+- block:
+  - name: create jenkins group
+    group:
+      name: "{{ jenkins.group }}"
+      state: present
+
+  - name: create jenkins user
+    user:
+      name: jenkins
+      group: "{{ jenkins.group }}"
+      home: /var/lib/jenkins
+  when: host_environment == 'local'
+
+## TODO: Fix the version using variable
+- block:
+  - name: disble cache for passwd and group (will be enabled later)
+    lineinfile:
+      dest: /etc/nscd.conf
+      regexp: "^\tenable-cache\t\t{{ item }}"
+      line: "\tenable-cache\t\t{{ item }}\t\tno"
+    with_items:
+      - passwd
+      - group
+
+  - name: force nscd to reload its config
+    systemd:
+      name: nscd
+      state: restarted
+
+  - name: install ansible via pip
+    pip:
+      name: ansible
+      state: present
+      version: 2.4.2.0
+
+  - name: enable cache for passwd and group
+    lineinfile:
+      dest: /etc/nscd.conf
+      regexp: "^\tenable-cache\t\t{{ item }}"
+      line: "\tenable-cache\t\t{{ item }}\t\tyes"
+    with_items:
+      - passwd
+      - group
+
+  - name: force nscd to reload its config
+    systemd:
+      name: nscd
+      state: restarted
+
+  when: host_environment != 'local'
+
+- name: ensure proper permission on .ssh directory
+  file:
+    dest: /var/lib/jenkins/.ssh
+    mode: 0755
+    state: directory
+    owner: jenkins
+    group: "{{ jenkins.group }}"
+
+- name: Copy ssh private key
+  copy:
+    content: |
+      {{ jenkins_private_key }}
+    dest: /var/lib/jenkins/.ssh/id_rsa
+    owner: jenkins
+    group: "{{ jenkins.group }}"
+    mode: 0600
+
+- name: generate public-key from private-key
+  shell: ssh-keygen -y -f /var/lib/jenkins/.ssh/id_rsa > /var/lib/jenkins/.ssh/id_rsa.pub
+
+- name: change permission of public-key
+  file:
+    path: /var/lib/jenkins/.ssh/id_rsa.pub
+    mode: 0644
+    owner: jenkins
+    group: "{{ jenkins.group }}"
+
+- stat:
+    path: /var/lib/jenkins/.ssh/known_hosts
+  register: file_exist
+
+- name: create known_hosts file for SSH
+  file:
+    path: /var/lib/jenkins/.ssh/known_hosts
+    owner: jenkins
+    group: "{{ jenkins.group }}"
+    mode: 0644
+    state: touch
+  when: not file_exist.stat.exists

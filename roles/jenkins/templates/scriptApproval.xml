@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<scriptApproval plugin="script-security@1.35">
+  <approvedScriptHashes>
+    <string></string>
+  </approvedScriptHashes>
+  <approvedSignatures/>
+  <aclApprovedSignatures/>
+  {% if groovy_scripts.classpaths is defined %}
+  <approvedClasspathEntries>
+  {% for classpath in groovy_scripts.classpaths -%}
+  {%- if classpath.approval_hash is defined %}
+    <approvedClasspathEntry>
+      <hash>{{ classpath.approval_hash }}</hash>
+      <url>file:/var/lib/jenkins/tools/{{ classpath.name }}</url>
+    </approvedClasspathEntry>
+  {% endif -%}
+  {%- endfor %}
+  </approvedClasspathEntries>
+  {% else %}
+  <approvedClasspathEntries/>
+  {% endif %}
+  <pendingScripts/>
+  <pendingSignatures/>
+  <pendingClasspathEntries/>
+</scriptApproval>
