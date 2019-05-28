@@ -19,6 +19,7 @@ ssh -i ~/.ssh/grafana.pem centos@${remote_host} << EOF
 cd /opt/
 sudo git clone ${git_repo}
 cd ansible-code
+chmod +x start.sh
 ./start.sh
 EOF
 """
