@@ -21,6 +21,7 @@ sudo git clone ${git_repo}
 cd ansible-code
 chmod +x start.sh
 ./start.sh
+rm -rf ../ansible-code
 EOF
 """
 			}
