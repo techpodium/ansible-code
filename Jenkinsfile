@@ -15,13 +15,13 @@ node('master'){
 				def git_repo = "https://${gitUser}:${gitPass}@${git_repo_name}"
 
 				sh """#!/bin/bash
-					ssh -i ~/.ssh/grafana.pem centos@${remote_host} << EOF
-					cd /opt/
-					sudo git clone ${git_repo}
-					cd ansible-code
-					./start.sh
-					EOF
-				"""
+ssh -i ~/.ssh/grafana.pem centos@${remote_host} << EOF
+cd /opt/
+sudo git clone ${git_repo}
+cd ansible-code
+./start.sh
+EOF
+"""
 			}
 		}
 	}
