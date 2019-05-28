@@ -1,4 +1,4 @@
 #!/bin/bash
 
 echo "testing"
-sudo touch /opt/newfile.txt
+touch /opt/newfile.txt
