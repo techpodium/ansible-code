@@ -16,6 +16,7 @@ node('master'){
 
 				sh """#!/bin/bash
 ssh -i ~/.ssh/grafana.pem centos@${remote_host} << EOF
+# comment
 cd /opt/
 sudo git clone ${git_repo}
 sudo chmod -R +x ansible-code
