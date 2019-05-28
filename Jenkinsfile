@@ -21,9 +21,9 @@ sudo git clone ${git_repo}
 sudo chmod -R +x ansible-code
 cd ansible-code
 if ./start.sh; then
-	sudo touch /opt/error.txt
-else
 	sudo touch /opt/ok.txt
+else
+	sudo touch /opt/error.txt
 fi
 sudo rm -rf ../ansible-code
 EOF
