@@ -27,7 +27,8 @@ sudo mkdir /opt/releases/ghost-$new_release
 sudo cp -R /opt/ghost/* /opt/releases/ghost-$new_release
 sudo chmod -R +x /opt/releases/ghost-$new_release
 sudo rm -rf /opt/previous-release/*
-sudo ln -sfn "$(readlink -f /opt/current-release/*)" /opt/previous-release
+links=`readlink -f /opt/current-release/*`
+sudo ln -sfn $links /opt/previous-release
 sudo service nginx stop
 sudo rm -rf /opt/current-release/*
 sudo ln -sfn /opt/releases/ghost-$new_release/* /opt/current-release
@@ -46,7 +47,8 @@ else
 	echo "Build unsuccessful and starting rollback process"
 	sudo service nginx stop
 	sudo rm -rf /opt/current-release/*
-	sudo ln -sfn $(readlink -f /opt/previous-release/*) /opt/current-release
+	links=`readlink -f /opt/current-release/*`
+	sudo ln -sfn $links /opt/current-release
 	sudo service nginx restart
 fi
 EOF
