@@ -13,8 +13,7 @@ node('master'){
 			wrap([$class: 'MaskPasswordsBuildWrapper', varPasswordPairs: [[password: "${gitPass}", var: 'masked_pass']]]) {
 				def git_repo = "https://${gitUser}:${gitPass}@${git_repo_name}"
 
-					sh """#!/bin/bash
-ssh -i ~/.ssh/grafana.pem centos@${remote_host} << EOF
+					sh """ssh -i ~/.ssh/grafana.pem centos@${remote_host} << EOF
 #sudo rm -rf /opt/ghost
 sudo mkdir -p /opt/ghost
 sudo mkdir -p /opt/previous-release
