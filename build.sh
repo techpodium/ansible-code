@@ -1,4 +1,3 @@
 #!/bin/bash
 
-echo "testing"
-touch /opt/newfile.txt
+echo "building"
