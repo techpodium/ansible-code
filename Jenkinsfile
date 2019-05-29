@@ -1,21 +1,21 @@
 #!groovy
 
 node('master'){
+	try {
+		def remote_host = "52.200.5.208"
+		def git_repo_name = "github.com/rafioul/ansible-code.git"
 
-	def remote_host = "52.200.5.208"
-	def git_repo_name = "github.com/rafioul/ansible-code.git"
+		stage ('Buid Repository') {
+			withCredentials([usernamePassword(credentialsId: 'git', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]){
+				def gitUser = GIT_USERNAME
+			def gitPass = URLEncoder.encode(GIT_PASSWORD, "UTF-8")
 
-	stage ('Buid Repository') {
-		withCredentials([usernamePassword(credentialsId: 'git', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]){
-			def gitUser = GIT_USERNAME
-      		def gitPass = URLEncoder.encode(GIT_PASSWORD, "UTF-8")
+			wrap([$class: 'MaskPasswordsBuildWrapper', varPasswordPairs: [[password: "${gitPass}", var: 'masked_pass']]]) {
+				def git_repo = "https://${gitUser}:${gitPass}@${git_repo_name}"
 
-      		wrap([$class: 'MaskPasswordsBuildWrapper', varPasswordPairs: [[password: "${gitPass}", var: 'masked_pass']]]) {
-    			def git_repo = "https://${gitUser}:${gitPass}@${git_repo_name}"
-
-				sh """#!/bin/bash
+					sh """#!/bin/bash
 ssh -i ~/.ssh/grafana.pem centos@${remote_host} << EOF
-sudo rm -rf /opt/ghost
+#sudo rm -rf /opt/ghost
 sudo mkdir -p /opt/ghost
 sudo mkdir -p /opt/previous-release
 sudo mkdir -p /opt/current-release
@@ -51,7 +51,19 @@ else
 fi
 EOF
 """
+				}
 			}
 		}
 	}
+	catch (erro) {
+		echo err.getMessage()
+	}
+	finally {
+		if (currentBuild.result == 'UNSTABLE' || currentBuild.result == 'FAILURE') {
+			echo 'I am failure'
+		} else {
+			echo 'One way or another, I have finished'
+		}
+	}
+
 }
