@@ -24,7 +24,7 @@ sudo rm -rf *
 sudo rm -rf .[^.] .??*
 sudo git clone ${git_repo} .
 #new_release=`cd /opt/ghost && git log --format="%H" -n 1`
-#${test}=\"\$(vault read -field=value emea/test/hockey/ios/${RELEASE2}/appID)\"
+
 #echo \"\$new_release\"
 sudo mkdir /opt/releases/ghost-\"\$(cd /opt/ghost && git log --format="%H" -n 1)\"
 EOF
