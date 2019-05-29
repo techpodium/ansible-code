@@ -55,7 +55,7 @@ EOF
 			}
 		}
 	}
-	catch (erro) {
+	catch (err) {
 		echo err.getMessage()
 	}
 	finally {
