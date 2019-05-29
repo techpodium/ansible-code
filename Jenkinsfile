@@ -27,7 +27,7 @@ sudo mkdir /opt/releases/ghost-$new_release
 sudo cp -R /opt/ghost/* /opt/releases/ghost-$new_release
 sudo chmod -R +x /opt/releases/ghost-$new_release
 sudo rm -rf /opt/previous-release/*
-sudo ln -sfn $(readlink -f /opt/current-release/*) /opt/previous-release
+sudo ln -sfn "$(readlink -f /opt/current-release/*)" /opt/previous-release
 sudo service nginx stop
 sudo rm -rf /opt/current-release/*
 sudo ln -sfn /opt/releases/ghost-$new_release/* /opt/current-release
