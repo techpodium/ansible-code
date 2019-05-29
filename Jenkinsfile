@@ -55,11 +55,12 @@ EOF
 			}
 		}
 	}
-	catch (err) {
-		echo err.getMessage()
+	catch (Exception e) {
+		echo e.getMessage()
+		currentBuild.result == 'FAILURE'
 	}
 	finally {
-		if (currentBuild.result == 'UNSTABLE' || currentBuild.result == 'FAILURE') {
+		if (currentBuild.result == 'FAILURE') {
 			echo 'I am failure'
 		} else {
 			echo 'One way or another, I have finished'
