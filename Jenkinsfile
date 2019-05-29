@@ -14,7 +14,7 @@ node('master'){
     			def git_repo = "https://${gitUser}:${gitPass}@${git_repo_name}"
 
 				sh """#!/bin/bash
-ssh -i ~/.ssh/grafana.pem ubuntu@${remote_host} << EOF
+ssh -i ~/.ssh/grafana.pem centos@${remote_host} << EOF
 sudo mkdir -p /opt/ghost
 sudo mkdir -p /opt/previous-release
 sudo mkdir -p /opt/current-release
