@@ -28,7 +28,6 @@ sudo mkdir -p /opt/releases/ghost-\"\$(cd /opt/ghost && git log --format="%H" -n
 sudo cp -R /opt/ghost/* /opt/releases/ghost-\"\$(cd /opt/ghost && git log --format="%H" -n 1)\"
 sudo chmod -R +x /opt/releases/ghost-\"\$(cd /opt/ghost && git log --format="%H" -n 1)\"
 sudo rm -rf /opt/previous-release/*
-links=`readlink -f /opt/current-release/*`
 sudo ln -sfn \"\$(readlink -f /opt/current-release)\" /opt/previous-release
 sudo service nginx stop
 sudo rm -rf /opt/current-release/*
@@ -48,7 +47,6 @@ else
 	echo "Build unsuccessful and starting rollback process"
 	sudo service nginx stop
 	sudo rm -rf /opt/current-release/*
-	links=`readlink -f /opt/current-release/*`
 	sudo ln -sfn \"\$(readlink -f /opt/current-release)\" /opt/current-release
 	sudo service nginx restart
 fi
