@@ -23,6 +23,7 @@ sudo rm -rf /opt/ghost/*
 cd /opt/ghost
 sudo git clone ${git_repo} .
 new_release=`cd /opt/ghost && git log --format="%H" -n 1`
+echo \$new_release
 sudo mkdir /opt/releases/ghost-\$new_release
 EOF
 """
