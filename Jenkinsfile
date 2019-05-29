@@ -57,7 +57,7 @@ EOF
 	}
 	catch (Exception e) {
 		echo e.getMessage()
-		currentBuild.result == 'FAILURE'
+		currentBuild.result = 'FAILURE'
 	}
 	finally {
 		if (currentBuild.result == 'FAILURE') {
