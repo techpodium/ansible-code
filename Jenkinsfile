@@ -2,11 +2,13 @@
 
 node('master'){
 
-	def remote_host = "52.200.5.208"
+	def remote_host = "34.228.196.96"
 	def git_repo_name = "github.com/rafioul/ansible-code.git"
 
 	stage ('Buid Repository') {
-		sh """ssh -i ~/.ssh/grafana.pem centos@${remote_host} << EOF
+		withCredentials([sshUserPrivateKey(credentialsId: "git-ssh-key", keyFileVariable: 'keyfile')]) {
+			echo "keyfile: ${keyfile}"
+			sh """ssh -i ~/.ssh/grafana.pem centos@${remote_host} << EOF
 sudo rm -rf /opt/ghost
 sudo mkdir -p /opt/ghost
 sudo mkdir -p /opt/previous-release
@@ -44,5 +46,6 @@ else
 fi
 EOF
 """
+		}
 	}
 }
