@@ -1,25 +1,28 @@
 #!groovy
 
 node('master'){
-	try {
-		def remote_host = "52.200.5.208"
-		def git_repo_name = "github.com/rafioul/ansible-code.git"
 
-		stage ('Buid Repository') {
-			withCredentials([usernamePassword(credentialsId: 'git', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]){
-				def gitUser = GIT_USERNAME
-			def gitPass = URLEncoder.encode(GIT_PASSWORD, "UTF-8")
+	def remote_host = "52.200.5.208"
+	def git_repo_name = "github.com/rafioul/ansible-code.git"
 
-			wrap([$class: 'MaskPasswordsBuildWrapper', varPasswordPairs: [[password: "${gitPass}", var: 'masked_pass']]]) {
-				def git_repo = "https://${gitUser}:${gitPass}@${git_repo_name}"
+	stage ('Buid Repository') {
+		withCredentials([usernamePassword(credentialsId: 'git', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]){
+			def gitUser = GIT_USERNAME
+      		def gitPass = URLEncoder.encode(GIT_PASSWORD, "UTF-8")
 
-					sh """ssh -i ~/.ssh/grafana.pem centos@${remote_host} << EOF
+      		wrap([$class: 'MaskPasswordsBuildWrapper', varPasswordPairs: [[password: "${gitPass}", var: 'masked_pass']]]) {
+    			def git_repo = "https://${gitUser}:${gitPass}@${git_repo_name}"
+
+				sh """ssh -i ~/.ssh/grafana.pem centos@${remote_host} << EOF
 sudo rm -rf /opt/ghost
 sudo mkdir -p /opt/ghost
 sudo mkdir -p /opt/previous-release
 sudo mkdir -p /opt/current-release
+
 cd /opt/ghost
-sudo git clone ${git_repo} .
+
+sudo ssh-agent bash -c 'ssh-add ~/.ssh/id_rsa; git clone git@github.com:rafioul/ansible-code.git .'
+
 sudo mkdir -p /opt/releases/ghost-\"\$(cd /opt/ghost && git log --format="%H" -n 1)\"
 sudo cp -R /opt/ghost/* /opt/releases/ghost-\"\$(cd /opt/ghost && git log --format="%H" -n 1)\"
 sudo chmod -R +x /opt/releases/ghost-\"\$(cd /opt/ghost && git log --format="%H" -n 1)\"
@@ -42,25 +45,13 @@ else
 	echo "Build unsuccessful and starting rollback process"
 	sudo service nginx stop
 	sudo rm -rf /opt/current-release/*
+	links=`readlink -f /opt/current-release/*`
 	sudo ln -sfn \"\$(readlink -f /opt/current-release)\" /opt/current-release
 	sudo service nginx restart
 fi
 EOF
 """
-				}
 			}
 		}
 	}
-	catch (Exception e) {
-		echo e.getMessage()
-		currentBuild.result = 'FAILURE'
-	}
-	finally {
-		if (currentBuild.result == 'FAILURE') {
-			echo 'I am failure'
-		} else {
-			echo 'One way or another, I have finished'
-		}
-	}
-
 }
