@@ -21,7 +21,7 @@ sudo mkdir -p /opt/current-release
 
 cd /opt/ghost
 
-sudo ssh-agent bash -c 'ssh-add ~/.ssh/id_rsa; git clone git@github.com:rafioul/ansible-code.git .'
+ssh-agent bash -c 'ssh-add ~/.ssh/id_rsa; git clone git@github.com:rafioul/ansible-code.git .'
 
 sudo mkdir -p /opt/releases/ghost-\"\$(cd /opt/ghost && git log --format="%H" -n 1)\"
 sudo cp -R /opt/ghost/* /opt/releases/ghost-\"\$(cd /opt/ghost && git log --format="%H" -n 1)\"
