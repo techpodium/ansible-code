@@ -35,8 +35,7 @@ sudo service nginx stop
 sudo ln -sfn /opt/releases/ghost-${release_number} /opt/current-release
 
 if [ ! -L /var/www/ghost/start.sh ]; then
-	# sudo rm -rf /var/www/ghost/*
-	sudo ln -sfn \"\$(readlink -f /opt/current-release)\" /var/www/ghost
+	sudo ln -sf /opt/current-release /var/www/ghost
 fi
 
 # yarn
@@ -44,7 +43,8 @@ fi
 #sudo ln -sf /etc/nginx/sites-available/ghost.audiomack.com.conf /etc/nginx/sites-enabled/ghost.audiomack.com.conf
 sudo service nginx restart
 
-if ./var/www/ghost/start.sh; then
+cd /var/www/ghost
+if ./start.sh; then
 	echo "Build successful and doing clean-up"
 	sudo ls -dt /opt/releases/ghost-*/ | tail -n +6 | xargs rm -rf
 else
