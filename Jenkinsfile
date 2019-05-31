@@ -12,8 +12,8 @@ node('master'){
 ssh -i ~/.ssh/grafana.pem ubuntu@${remote_host} << EOF
 sudo rm -rf /opt/ghost
 sudo mkdir -p /opt/ghost
-sudo mkdir -p /opt/previous-release
-sudo mkdir -p /opt/current-release
+# sudo mkdir -p /opt/previous-release
+# sudo mkdir -p /opt/current-release
 
 cd /opt/ghost
 
@@ -28,18 +28,18 @@ ssh -i ~/.ssh/grafana.pem ubuntu@${remote_host} << EOF
 sudo mkdir -p /opt/releases/ghost-${last_commit}
 sudo cp -R /opt/ghost/* /opt/releases/ghost-${last_commit}
 sudo chmod -R +x /opt/releases/ghost-${last_commit}
-sudo rm -rf /opt/previous-release/*
+# sudo rm -rf /opt/previous-release/*
 
-if [ -L /opt/current-release/start.sh ]; then
+if [ -L /opt/current-release ]; then
 	sudo ln -sfn \"\$(readlink -f /opt/current-release)\" /opt/previous-release
 fi
 sudo service nginx stop
-sudo rm -rf /opt/current-release/*
-sudo ln -sfn /opt/releases/ghost-${last_commit}/* /opt/current-release
+# sudo rm -rf /opt/current-release/*
+sudo ln -sfn /opt/releases/ghost-${last_commit} /opt/current-release
 
 if [ ! -L /var/www/ghost/start.sh ]; then
 	sudo rm -rf /var/www/ghost/*
-	sudo ln -sfn /opt/current-release/* /var/www/ghost/
+	sudo ln -sfn /opt/current-release /var/www/ghost
 fi
 
 cd /var/www/ghost/
@@ -54,9 +54,9 @@ if ./start.sh; then
 else
 	echo "Build unsuccessful and starting rollback process"
 	sudo service nginx stop
-	if [ -L /opt/previous-release/start.sh ]; then
-		sudo rm -rf /opt/current-release/*
-		sudo ln -sfn \"\$(readlink -f /opt/previous-release/*)\" /opt/current-release
+	if [ -L /opt/previous-release ]; then
+		# sudo rm -rf /opt/current-release/*
+		sudo ln -sfn \"\$(readlink -f /opt/previous-release)\" /opt/current-release
 	else
 		echo "/opt/previous-release is empty, nothing to rollback"
 	fi
