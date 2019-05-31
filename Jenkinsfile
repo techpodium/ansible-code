@@ -19,8 +19,8 @@ cd /opt/ghost
 
 sudo ssh-agent bash -c 'ssh-add /home/ubuntu/.ssh/id_rsa; git clone git@github.com:rafioul/ansible-code.git .'
 
-rel=\\`git log --format="%H" -n 1\\`
-echo "rel: \$rel"
+rel=`git log --format="%H" -n 1`
+echo \$rel
 
 sudo mkdir -p /opt/releases/ghost-\"\$(cd /opt/ghost && git log --format="%H" -n 1)\"
 sudo cp -R /opt/ghost/* /opt/releases/ghost-\"\$(cd /opt/ghost && git log --format="%H" -n 1)\"
