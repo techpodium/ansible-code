@@ -35,7 +35,8 @@ if [ -L /opt/current-release ]; then
 fi
 sudo service nginx stop
 # sudo rm -rf /opt/current-release/*
-sudo ln -sfn /opt/releases/ghost-${last_commit}/ /opt/current-release
+# sudo ln -sfn /opt/releases/ghost-${last_commit}/ /opt/current-release
+sudo ln -sfn /opt/releases/ghost-de3ec17469766cd69658e5f215c152236ec18235 /opt/current-release
 
 if [ ! -L /var/www/ghost/start.sh ]; then
 	sudo rm -rf /var/www/ghost/*
