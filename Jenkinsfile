@@ -8,7 +8,8 @@ node('master'){
 	stage ('Buid Repository') {
 		withCredentials([sshUserPrivateKey(credentialsId: "git-ssh-key", keyFileVariable: 'keyfile')]) {
 			sh "scp -i ~/.ssh/grafana.pem ${keyfile} ubuntu@${remote_host}:/home/ubuntu/.ssh/id_rsa"
-			sh """ssh -i ~/.ssh/grafana.pem ubuntu@${remote_host} << EOF
+			sh """#!/bin/bash -x
+ssh -i ~/.ssh/grafana.pem ubuntu@${remote_host} << EOF
 sudo rm -rf /opt/ghost
 sudo mkdir -p /opt/ghost
 sudo mkdir -p /opt/previous-release
@@ -54,8 +55,8 @@ else
 		echo "/opt/previous-release is empty, nothing to rollback"
 	fi
 	sudo service nginx restart
-	rm -rf ~/.ssh/id_rsa
 fi
+rm -rf ~/.ssh/id_rsa
 EOF
 """
 		}
