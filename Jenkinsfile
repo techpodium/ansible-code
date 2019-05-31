@@ -23,19 +23,20 @@ sudo ssh-agent bash -c 'ssh-add /home/ubuntu/.ssh/id_rsa; git clone git@github.c
 EOF
 """
 			last_commit = sh (script:"ssh -i ~/.ssh/grafana.pem ubuntu@${remote_host} 'cd /opt/ghost; git log --format=\"%H\" -n 1'", returnStdout:true )
+			release_no = last_commit.trim()
 
 			sh """#!/bin/bash -x
 ssh -i ~/.ssh/grafana.pem ubuntu@${remote_host} << EOF
 
-sudo mkdir -p /opt/releases/ghost-${last_commit}
-sudo cp -R /opt/ghost/* /opt/releases/ghost-${last_commit}
-sudo chmod -R +x /opt/releases/ghost-${last_commit}
+sudo mkdir -p /opt/releases/ghost-${release_no}
+sudo cp -R /opt/ghost/* /opt/releases/ghost-${release_no}
+sudo chmod -R +x /opt/releases/ghost-${release_no}
 
 if [ -L /opt/current-release ]; then
 	sudo ln -sfn \"\$(readlink -f /opt/current-release)\" /opt/previous-release
 fi
 # sudo service nginx stop
-sudo ln -sfn /opt/releases/ghost-${last_commit}/ /opt/current-release
+sudo ln -sfn /opt/releases/ghost-${release_no}/ /opt/current-release
 
 EOF
 """
