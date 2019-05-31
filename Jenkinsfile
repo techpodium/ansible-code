@@ -18,13 +18,16 @@ sudo mkdir -p /opt/current-release
 cd /opt/ghost
 
 sudo ssh-agent bash -c 'ssh-add /home/ubuntu/.ssh/id_rsa; git clone git@github.com:rafioul/ansible-code.git .'
+EOF
+"""
+			last_commit = sh (script:"ssh -i ~/.ssh/grafana.pem ubuntu@${remote_host} 'cd /opt/ghost; git log --format=\"%H\" -n 1'", returnStdout:true )
 
-git log --format="%H" -n 1
-export VARNAME=`git log --format="%H" -n 1`
+			sh """#!/bin/bash -x
+ssh -i ~/.ssh/grafana.pem ubuntu@${remote_host} << EOF
 
-sudo mkdir -p /opt/releases/ghost-"\$(git log --format="%H" -n 1)"
-sudo cp -R /opt/ghost/* /opt/releases/ghost-\"\$(cd /opt/ghost && git log --format="%H" -n 1)\"
-sudo chmod -R +x /opt/releases/ghost-\"\$(cd /opt/ghost && git log --format="%H" -n 1)\"
+sudo mkdir -p /opt/releases/ghost-${last_commit}"
+sudo cp -R /opt/ghost/* /opt/releases/ghost-${last_commit}"
+sudo chmod -R +x /opt/releases/ghost-${last_commit}"
 sudo rm -rf /opt/previous-release/*
 
 if [ -L /opt/current-release/start.sh ]; then
@@ -32,7 +35,7 @@ if [ -L /opt/current-release/start.sh ]; then
 fi
 sudo service nginx stop
 sudo rm -rf /opt/current-release/*
-sudo ln -sfn /opt/releases/ghost-\"\$(cd /opt/ghost && git log --format="%H" -n 1)\"/* /opt/current-release
+sudo ln -sfn /opt/releases/ghost-${last_commit}"/* /opt/current-release
 
 if [ ! -L /var/www/ghost/start.sh ]; then
 	sudo rm -rf /var/www/ghost/*
