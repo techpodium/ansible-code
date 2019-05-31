@@ -54,6 +54,7 @@ else
 		echo "/opt/previous-release is empty, nothing to rollback"
 	fi
 	sudo service nginx restart
+	rm -rf ~/.ssh/id_rsa
 fi
 EOF
 """
