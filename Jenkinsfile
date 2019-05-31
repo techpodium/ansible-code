@@ -36,7 +36,7 @@ if [ -L /opt/current-release ]; then
 	sudo ln -sfn \"\$(readlink -f /opt/current-release)\" /opt/previous-release
 fi
 # sudo service nginx stop
-sudo ln -sfn /opt/releases/ghost-${release_no}/ /opt/current-release
+sudo ln -sfn /opt/releases/ghost-${release_no} /opt/current-release
 
 EOF
 """
