@@ -9,7 +9,7 @@ node('master'){
 		withCredentials([sshUserPrivateKey(credentialsId: "git-ssh-key", keyFileVariable: 'keyfile')]) {
 			sh "scp -i ~/.ssh/grafana.pem ${keyfile} ubuntu@${remote_host}:/home/ubuntu/.ssh/id_rsa"
 			sh """#!/bin/bash -x
-ssh -i ~/.ssh/grafana.pem ubuntu@"${remote_host}" << EOF
+ssh -i ~/.ssh/grafana.pem ubuntu@${remote_host} << EOF
 sudo rm -rf /opt/ghost
 sudo mkdir -p /opt/ghost
 sudo mkdir -p /opt/previous-release
@@ -20,8 +20,9 @@ cd /opt/ghost
 sudo ssh-agent bash -c 'ssh-add /home/ubuntu/.ssh/id_rsa; git clone git@github.com:rafioul/ansible-code.git .'
 
 git log --format="%H" -n 1
+export VARNAME=`git log --format="%H" -n 1`
 
-sudo mkdir -p /opt/releases/ghost-$(cd /opt/ghost && git log --format="%H" -n 1)
+sudo mkdir -p /opt/releases/ghost-$VARNAME
 sudo cp -R /opt/ghost/* /opt/releases/ghost-\"\$(cd /opt/ghost && git log --format="%H" -n 1)\"
 sudo chmod -R +x /opt/releases/ghost-\"\$(cd /opt/ghost && git log --format="%H" -n 1)\"
 sudo rm -rf /opt/previous-release/*
