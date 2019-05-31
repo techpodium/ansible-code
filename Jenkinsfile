@@ -21,7 +21,7 @@ sudo ssh-agent bash -c 'ssh-add /home/ubuntu/.ssh/id_rsa; git clone git@github.c
 
 git log --format="%H" -n 1 > /tmp/commit.txt
 rel=`cat /tmp/commit.txt`
-echo "rel: ${rel}"
+echo \"\$(git log --format="%H" -n 1)\"
 
 sudo mkdir -p /opt/releases/ghost-\"\$(cd /opt/ghost && git log --format="%H" -n 1)\"
 sudo cp -R /opt/ghost/* /opt/releases/ghost-\"\$(cd /opt/ghost && git log --format="%H" -n 1)\"
