@@ -60,7 +60,7 @@ else
 	fi
 	sudo service nginx restart
 fi
-rm -rf ~/.ssh/id_rsa
+# rm -rf ~/.ssh/id_rsa
 EOF
 """
 		}
