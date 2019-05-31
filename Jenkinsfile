@@ -10,7 +10,6 @@ node('master'){
 			sh "scp -i ~/.ssh/grafana.pem ${keyfile} ubuntu@${remote_host}:/home/ubuntu/.ssh/id_rsa"
 			sh """#!/bin/bash -x
 ssh -i ~/.ssh/grafana.pem ubuntu@${remote_host} << EOF
-chmod 600 ~/.ssh/id_rsa
 sudo rm -rf /opt/ghost
 sudo mkdir -p /opt/ghost
 sudo mkdir -p /opt/previous-release
@@ -20,8 +19,7 @@ cd /opt/ghost
 
 sudo ssh-agent bash -c 'ssh-add /home/ubuntu/.ssh/id_rsa; git clone git@github.com:rafioul/ansible-code.git .'
 
-release=`cd /opt/ghost; git log --format="%H" -n 1`
-echo \"Release: \$release\"
+git log --format="%H" -n 1 >> /opt/log.txt
 
 sudo mkdir -p /opt/releases/ghost-\"\$(cd /opt/ghost && git log --format="%H" -n 1)\"
 sudo cp -R /opt/ghost/* /opt/releases/ghost-\"\$(cd /opt/ghost && git log --format="%H" -n 1)\"
@@ -60,7 +58,7 @@ else
 	fi
 	sudo service nginx restart
 fi
-# rm -rf ~/.ssh/id_rsa
+rm -rf ~/.ssh/id_rsa
 EOF
 """
 		}
