@@ -10,6 +10,7 @@ node('master'){
 			sh "scp -i ~/.ssh/grafana.pem ${keyfile} ubuntu@${remote_host}:/home/ubuntu/.ssh/id_rsa"
 			sh """#!/bin/bash -x
 ssh -i ~/.ssh/grafana.pem ubuntu@${remote_host} << EOF
+chmod 600 ~/.ssh/id_rsa
 sudo rm -rf /opt/ghost
 sudo mkdir -p /opt/ghost
 sudo mkdir -p /opt/previous-release
@@ -59,7 +60,7 @@ else
 	fi
 	sudo service nginx restart
 fi
-rm -rf ~/.ssh/id_rsa
+# rm -rf ~/.ssh/id_rsa
 EOF
 """
 		}
