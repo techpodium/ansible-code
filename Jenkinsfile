@@ -25,9 +25,9 @@ EOF
 			sh """#!/bin/bash -x
 ssh -i ~/.ssh/grafana.pem ubuntu@${remote_host} << EOF
 
-sudo mkdir -p /opt/releases/ghost-${last_commit}"
-sudo cp -R /opt/ghost/* /opt/releases/ghost-${last_commit}"
-sudo chmod -R +x /opt/releases/ghost-${last_commit}"
+sudo mkdir -p /opt/releases/ghost-${last_commit}
+sudo cp -R /opt/ghost/* /opt/releases/ghost-${last_commit}
+sudo chmod -R +x /opt/releases/ghost-${last_commit}
 sudo rm -rf /opt/previous-release/*
 
 if [ -L /opt/current-release/start.sh ]; then
@@ -35,7 +35,7 @@ if [ -L /opt/current-release/start.sh ]; then
 fi
 sudo service nginx stop
 sudo rm -rf /opt/current-release/*
-sudo ln -sfn /opt/releases/ghost-${last_commit}"/* /opt/current-release
+sudo ln -sfn /opt/releases/ghost-${last_commit}/* /opt/current-release
 
 if [ ! -L /var/www/ghost/start.sh ]; then
 	sudo rm -rf /var/www/ghost/*
