@@ -21,7 +21,7 @@ sudo ssh-agent bash -c 'ssh-add /home/ubuntu/.ssh/id_rsa; git clone git@github.c
 
 git log --format="%H" -n 1
 
-sudo mkdir -p /opt/releases/ghost-\"\$(cd /opt/ghost && git log --format="%H" -n 1)\"
+sudo mkdir -p /opt/releases/ghost-$(cd /opt/ghost && git log --format="%H" -n 1)
 sudo cp -R /opt/ghost/* /opt/releases/ghost-\"\$(cd /opt/ghost && git log --format="%H" -n 1)\"
 sudo chmod -R +x /opt/releases/ghost-\"\$(cd /opt/ghost && git log --format="%H" -n 1)\"
 sudo rm -rf /opt/previous-release/*
