@@ -12,7 +12,7 @@ node('master'){
 			sh "scp -i ~/.ssh/grafana.pem ${keyfile} ubuntu@${remote_host}:/home/ubuntu/.ssh/id_rsa"
 			dir("${env.WORKSPACE}"){
 				echo "${env.WORKSPACE}"
-				sh("deploy.sh")
+				sh("bash deploy.sh")
 				sleep(time:300,unit:"SECONDS")
 			}
 		}
