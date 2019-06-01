@@ -20,8 +20,7 @@ EOF
 			)
 			String release_number = last_commit_hash.trim()
 
-			sh """#!/bin/bash -x
-ssh -i ~/.ssh/grafana.pem ubuntu@${remote_host} << EOF
+			sh """ssh -i ~/.ssh/grafana.pem ubuntu@${remote_host} << EOF
 
 sudo mkdir -p /opt/releases/ghost-${release_number}
 sudo cp -R /opt/ghost/* /opt/releases/ghost-${release_number}
