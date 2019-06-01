@@ -20,20 +20,7 @@ EOF
 			)
 			String release_number = last_commit_hash.trim()
 
-			sh """ssh -i ~/.ssh/grafana.pem ubuntu@${remote_host} << EOF
-
-sudo mkdir -p /opt/releases/ghost-${release_number}
-sudo cp -R /opt/ghost/* /opt/releases/ghost-${release_number}
-sudo chmod -R +x /opt/releases/ghost-${release_number}
-
-if [ -L /opt/current-release ]; then
-	sudo ln -sfn \$(readlink -f /opt/current-release) /opt/previous-release
-fi
-sudo service nginx stop
-sudo ln -sfn /opt/releases/ghost-${release_number} /opt/current-release
-
-EOF
-"""
+			sh (script: "ssh -i ~/.ssh/grafana.pem ubuntu@${remote_host} 'sudo ln -sfn \$(readlink -f /opt/current-release) /opt/previous-release'")
 		}
 	}
 }
