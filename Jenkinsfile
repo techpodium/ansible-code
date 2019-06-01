@@ -10,9 +10,10 @@ node('master'){
 	stage ('Buid Repository') {
 		withCredentials([sshUserPrivateKey(credentialsId: "git-ssh-key", keyFileVariable: 'keyfile')]) {
 			sh "scp -i ~/.ssh/grafana.pem ${keyfile} ubuntu@${remote_host}:/home/ubuntu/.ssh/id_rsa"
-			dir("ansible-code"){
+			dir("${env.WORKSPACE}"){
+				echo "${env.WORKSPACE}"
 				sleep(time:300,unit:"SECONDS")
-				sh "deploy.sh"
+				sh("deploy.sh")
 			}
 		}
 	}
