@@ -29,6 +29,7 @@ sudo cp -R /opt/ghost/* /opt/releases/ghost-${release_number}
 sudo chmod -R +x /opt/releases/ghost-${release_number}
 
 if [ -L /opt/current-release ]; then
+	readlink -f /opt/current-release
 	sudo ln -sfn \"\$(readlink -f /opt/current-release)\" /opt/previous-release
 fi
 EOF
