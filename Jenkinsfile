@@ -32,7 +32,7 @@ sudo service nginx stop; \
 sudo ln -sfn /opt/releases/ghost-\$(git log --format="%H" -n 1) /opt/current-release; \
 
 if [ ! -L /var/www/ghost/start.sh ]; then \
-	sudo ln -sf /opt/current-release /var/www/ghost; \
+	sudo ln -sfn /opt/current-release /var/www/ghost; \
 fi;'
 """)
 		}
