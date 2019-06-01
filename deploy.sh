@@ -1,4 +1,4 @@
-!/bin/bash -x
+#!/bin/bash -x
 
 remote_host="18.234.219.190"
 git_repo_name="git@github.com:rafioul/ansible-code.git"
@@ -34,7 +34,7 @@ sudo service nginx restart
 cd /var/www/ghost
 if ./start.sh; then
 	echo "Build successful and doing clean-up"
-	sudo ls -dt /opt/releases/ghost-*/ | tail -n +6 | xargs rm -rf
+	sudo ls -dt /opt/releases/ghost-*/ | tail -n +6 | xargs sudo rm -rf
 else
 	echo "Build unsuccessful and starting rollback process"
 	sudo service nginx stop
@@ -46,3 +46,4 @@ else
 	sudo service nginx restart
 fi
 # rm -rf ~/.ssh/id_rsa
+EOF
