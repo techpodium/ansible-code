@@ -29,7 +29,11 @@ if [ -L /opt/current-release ]; then \
 	sudo ln -sfn \$(readlink -f /opt/current-release) /opt/previous-release; \
 fi; \
 sudo service nginx stop; \
-sudo ln -sfn /opt/releases/ghost-\$(git log --format="%H" -n 1) /opt/current-release'
+sudo ln -sfn /opt/releases/ghost-\$(git log --format="%H" -n 1) /opt/current-release; \
+
+if [ ! -L /var/www/ghost/start.sh ]; then \
+	sudo ln -sf /opt/current-release /var/www/ghost; \
+fi;'
 """)
 		}
 	}
