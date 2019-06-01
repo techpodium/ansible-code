@@ -1,5 +1,5 @@
 #!/bin/bash
 
 echo "starting script"
-touch /opt/test.txt
+exit 1
 ./build.sh
