@@ -3,7 +3,7 @@
 node('master'){
 
 	def remote_host = "18.234.219.190"
-	def git_repo_name = "github.com/rafioul/ansible-code.git"
+	def git_repo_name = "git@github.com:rafioul/ansible-code.git"
 
 	stage ('Buid Repository') {
 		withCredentials([sshUserPrivateKey(credentialsId: "git-ssh-key", keyFileVariable: 'keyfile')]) {
@@ -14,7 +14,7 @@ sudo rm -rf /opt/ghost; \
 sudo mkdir -p /opt/ghost; \
 
 cd /opt/ghost; \
-sudo ssh-agent bash -c "ssh-add /home/ubuntu/.ssh/id_rsa; git clone git@github.com:rafioul/ansible-code.git ."; \
+sudo ssh-agent bash -c "ssh-add /home/ubuntu/.ssh/id_rsa; git clone ${git_repo_name} ."; \
 
 sudo mkdir -p /opt/releases/ghost-\$(git log --format="%H" -n 1); \
 sudo cp -R /opt/ghost/* /opt/releases/ghost-\$(git log --format="%H" -n 1); \
