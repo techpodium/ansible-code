@@ -11,6 +11,7 @@ node('master'){
 		withCredentials([sshUserPrivateKey(credentialsId: "git-ssh-key", keyFileVariable: 'keyfile')]) {
 			sh "scp -i ~/.ssh/grafana.pem ${keyfile} ubuntu@${remote_host}:/home/ubuntu/.ssh/id_rsa"
 			dir("ansible-code"){
+				sleep(time:300,unit:"SECONDS")
 				sh "deploy.sh"
 			}
 		}
