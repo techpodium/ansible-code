@@ -8,8 +8,7 @@ node('master'){
 	stage ('Buid Repository') {
 		withCredentials([sshUserPrivateKey(credentialsId: "git-ssh-key", keyFileVariable: 'keyfile')]) {
 			sh "scp -i ~/.ssh/grafana.pem ${keyfile} ubuntu@${remote_host}:/home/ubuntu/.ssh/id_rsa"
-			sh """#!/bin/bash -x
-ssh -i ~/.ssh/grafana.pem ubuntu@${remote_host} << EOF
+			sh """ssh -i ~/.ssh/grafana.pem ubuntu@${remote_host} << EOF
 sudo rm -rf /opt/ghost
 sudo mkdir -p /opt/ghost
 
