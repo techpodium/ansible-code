@@ -27,7 +27,7 @@ sudo ln -sfn /opt/releases/ghost-\$(git log --format="%H" -n 1) /opt/current-rel
 
 if [ ! -L /var/www/ghost ]; then \
 	sudo ln -sf /opt/current-release /var/www/ghost; \
-fi;
+fi; \
 
 # yarn; \
 
