@@ -16,7 +16,7 @@ sudo mkdir -p /opt/ghost; \
 cd /opt/ghost; \
 sudo ssh-agent bash -c "ssh-add /home/ubuntu/.ssh/id_rsa; git clone ${git_repo_name} ."; \
 
-release_number=\$(git log --format="%H" -n 1)
+release_number=\$(git log --format="%H" -n 1); \
 sudo mkdir -p /opt/releases/ghost-\$release_number; \
 sudo cp -R /opt/ghost/* /opt/releases/ghost-\$release_number; \
 sudo chmod -R +x /opt/releases/ghost-\$release_number; \
