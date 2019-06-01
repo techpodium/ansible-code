@@ -11,7 +11,7 @@ cd /opt/ghost
 sudo ssh-agent bash -c 'ssh-add /home/ubuntu/.ssh/id_rsa; git clone git@github.com:rafioul/ansible-code.git .'
 
 git log --format="%H" -n 1 | tr -d '\040\011\012\015'
-release_number=`git log --format="%H" -n 1 | tr -d '\040\011\012\015'`
+release_number=$(git log --format="%H" -n 1 | tr -d '\040\011\012\015')
 echo $release_number > /tmp/commit.txt
 
 sudo mkdir -p /opt/releases/ghost-$release_number
