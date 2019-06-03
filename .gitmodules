@@ -1,0 +1,3 @@
+[submodule "sm_scripts"]
+	path = sm_scripts
+	url = git@github.com:rafioul/scripts.git
