@@ -6,15 +6,23 @@ node('master'){
 	def git_repo_name = "git@github.com:rafioul/ansible-code.git"
 
 	stage ('Buid Repository') {
-		withCredentials([sshUserPrivateKey(credentialsId: "git-ssh-key", keyFileVariable: 'keyfile')]) {
+		withCredentials([sshUserPrivateKey(credentialsId: "ssh-key-ansible_code", keyFileVariable: 'keyfile')]) {
 			sh "scp -i ~/.ssh/grafana.pem ${keyfile} ubuntu@${remote_host}:/home/ubuntu/.ssh/id_rsa"
+		}
+		
+		withCredentials([sshUserPrivateKey(credentialsId: "git-ssh-key-scripts", keyFileVariable: 'keyfile')]) {
+			sh "scp -i ~/.ssh/grafana.pem ${keyfile} ubuntu@${remote_host}:/home/ubuntu/.ssh/id_rsa_sub"
+		}
 
 			sh (script: """ssh -i ~/.ssh/grafana.pem ubuntu@${remote_host} '
 sudo rm -rf /opt/ghost; \
 sudo mkdir -p /opt/ghost; \
 
 cd /opt/ghost; \
-sudo ssh-agent bash -c "ssh-add /home/ubuntu/.ssh/id_rsa; git clone ${git_repo_name} ."; \
+sudo ssh-agent bash -c "ssh-add -D; ssh-add /home/ubuntu/.ssh/id_rsa; git clone ${git_repo_name} ."; \
+sudo ssh-agent bash -c "ssh-add -D; ssh-add /home/ubuntu/.ssh/id_rsa_sub; git submodule update --init"; \
+
+# sudo ssh-agent bash -c "ssh-add /home/ubuntu/.ssh/id_rsa; git clone ${git_repo_name} ."; \
 
 release_number=\$(git log --format="%H" -n 1); \
 sudo mkdir -p /opt/releases/ghost-\$release_number; \
@@ -52,6 +60,5 @@ else \
 fi; \
 # rm -rf ~/.ssh/id_rsa;'
 """)
-		}
 	}
 }
