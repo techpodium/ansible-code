@@ -60,6 +60,9 @@ sudo chown -R ubuntu:ubuntu /opt/current-release/; \
 
 sudo ln -sf /var/www/ghost/system/files/ghost.audiomack.com.conf /etc/nginx/sites-available/ghost.audiomack.com.conf; \
 sudo ln -sf /etc/nginx/sites-available/ghost.audiomack.com.conf /etc/nginx/sites-enabled/ghost.audiomack.com.conf; \
+
+sudo chown ubuntu:ubuntu /etc/nginx/sites-available/ghost.audiomack.com.conf
+sudo chown ubuntu:ubuntu /etc/nginx/sites-enabled/ghost.audiomack.com.conf
 sudo service nginx restart; \
 
 cd /var/www/ghost; \
