@@ -1,20 +1,20 @@
 #!groovy
 
 node('master'){
+	try {
+		def remote_host = "54.242.228.243"
+		def git_repo_name = "git@github.com:rafioul/ansible-code.git"
 
-	def remote_host = "18.234.219.190"
-	def git_repo_name = "git@github.com:rafioul/ansible-code.git"
+		stage ('Buid Repository') {
+			withCredentials([sshUserPrivateKey(credentialsId: "ssh-key-ansible_code", keyFileVariable: 'keyfile')]) {
+				sh "scp -i ~/.ssh/grafana.pem ${keyfile} ubuntu@${remote_host}:/home/ubuntu/.ssh/id_rsa"
+			}
 
-	stage ('Buid Repository') {
-		withCredentials([sshUserPrivateKey(credentialsId: "ssh-key-ansible_code", keyFileVariable: 'keyfile')]) {
-			sh "scp -i ~/.ssh/grafana.pem ${keyfile} ubuntu@${remote_host}:/home/ubuntu/.ssh/id_rsa"
-		}
-		
-		withCredentials([sshUserPrivateKey(credentialsId: "git-ssh-key-scripts", keyFileVariable: 'keyfile')]) {
-			sh "scp -i ~/.ssh/grafana.pem ${keyfile} ubuntu@${remote_host}:/home/ubuntu/.ssh/id_rsa_sub"
-		}
+			withCredentials([sshUserPrivateKey(credentialsId: "git-ssh-key-scripts", keyFileVariable: 'keyfile')]) {
+				sh "scp -i ~/.ssh/grafana.pem ${keyfile} ubuntu@${remote_host}:/home/ubuntu/.ssh/id_rsa_sub"
+			}
 
-			sh (script: """ssh -i ~/.ssh/grafana.pem ubuntu@${remote_host} '
+				def statusCode = sh (script: """ssh -i ~/.ssh/grafana.pem ubuntu@${remote_host} '
 sudo rm -rf /opt/ghost; \
 sudo mkdir -p /opt/ghost; \
 
@@ -48,6 +48,7 @@ cd /var/www/ghost; \
 if ./start.sh; then \
 	echo "Build successful and doing clean-up"; \
 	sudo ls -dt /opt/releases/ghost-*/ | tail -n +6 | xargs sudo rm -rf; \
+	exis 0; \
 else \
 	echo "Build unsuccessful and starting rollback process"; \
 	sudo service nginx stop; \
@@ -57,8 +58,30 @@ else \
 		echo "/opt/previous-release is empty, nothing to rollback"; \
 	fi; \
 	sudo service nginx restart; \
+	exit 1; \
 fi; \
 # rm -rf ~/.ssh/id_rsa;'
-""")
+""", returnStatus: true)
+		
+		if(statusCode == 0)
+			currentBuild.result = 'SUCCESS'
+		else if(statusCode == 1)
+			currentBuild.result = 'FAILURE'
+		}
+	}
+	catch (Exception e) {
+		currentBuild.result = 'FAILURE'
+		echo e.toString()
+		throw e
+	}
+	finally {
+
+		if (currentBuild.result == 'FAILURE') {
+			echo "Build unsuccessfull"
+			//slack_notification("FAILURE", '#00FF00')
+		} else {
+			echo "Build successfull"
+			//slack_notification("SUCCESS", '#FF0000')
+		}
 	}
 }
