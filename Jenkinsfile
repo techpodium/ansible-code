@@ -15,6 +15,11 @@ node('master'){
 			}
 
 				def statusCode = sh (script: """ssh -i ~/.ssh/grafana.pem ubuntu@${remote_host} '
+sudo rm -rf /opt/releases/*; \
+sudo rm -rf /opt/current-release; \
+sudo rm -rf /opt/previous-release; \
+sudo rm -rf /var/www/ghost; \
+
 sudo rm -rf /opt/ghost; \
 sudo mkdir -p /opt/ghost; \
 
@@ -22,33 +27,47 @@ cd /opt/ghost; \
 sudo ssh-agent bash -c "ssh-add -D; ssh-add /home/ubuntu/.ssh/id_rsa; git clone ${git_repo_name} ."; \
 sudo ssh-agent bash -c "ssh-add -D; ssh-add /home/ubuntu/.ssh/id_rsa_sub; git submodule update --init"; \
 
-# sudo ssh-agent bash -c "ssh-add /home/ubuntu/.ssh/id_rsa; git clone ${git_repo_name} ."; \
+sudo chown -R ubuntu:ubuntu /opt/ghost; \
 
 release_number=\$(git log --format="%H" -n 1); \
 sudo mkdir -p /opt/releases/ghost-\$release_number; \
-sudo cp -R /opt/ghost/* /opt/releases/ghost-\$release_number; \
+sudo chown -R ubuntu:ubuntu /opt/releases; \
+
+sudo cp -r /opt/ghost/. /opt/releases/ghost-\$release_number; \
+# sudo cp -r /opt/ghost/* /opt/releases/ghost-\$release_number; \
+
 sudo chmod -R +x /opt/releases/ghost-\$release_number; \
+
 if [ -L /opt/current-release ]; then \
 	sudo ln -sfn \$(readlink -f /opt/current-release) /opt/previous-release; \
+	sudo chown -R ubuntu:ubuntu /opt/previous-release/; \
+	sudo chown -R ubuntu:ubuntu /opt/previous-release; \
+
 fi; \
+
 sudo service nginx stop; \
 sudo ln -sfn /opt/releases/ghost-\$release_number /opt/current-release; \
 
 if [ ! -L /var/www/ghost ]; then \
 	sudo ln -sf /opt/current-release /var/www/ghost; \
+	sudo chown -R ubuntu:ubuntu /var/www/ghost; \
+	sudo chown -R ubuntu:ubuntu /var/www/ghost/; \
+	#sudo chown -R ubuntu:ubuntu /var/www/ghost/*; \
 fi; \
 
-# yarn; \
+sudo chown -R ubuntu:ubuntu /opt/current-release; \
+sudo chown -R ubuntu:ubuntu /opt/current-release/; \
+#sudo chown -R ubuntu:ubuntu /opt/current-release/*; \
 
 sudo ln -sf /var/www/ghost/system/files/ghost.audiomack.com.conf /etc/nginx/sites-available/ghost.audiomack.com.conf; \
 sudo ln -sf /etc/nginx/sites-available/ghost.audiomack.com.conf /etc/nginx/sites-enabled/ghost.audiomack.com.conf; \
 sudo service nginx restart; \
 
 cd /var/www/ghost; \
+
 if ./start.sh; then \
 	echo "Build successful and doing clean-up"; \
 	sudo ls -dt /opt/releases/ghost-*/ | tail -n +6 | xargs sudo rm -rf; \
-	exis 0; \
 else \
 	echo "Build unsuccessful and starting rollback process"; \
 	sudo service nginx stop; \
@@ -58,7 +77,6 @@ else \
 		echo "/opt/previous-release is empty, nothing to rollback"; \
 	fi; \
 	sudo service nginx restart; \
-	exit 1; \
 fi; \
 # rm -rf ~/.ssh/id_rsa;'
 """, returnStatus: true)
