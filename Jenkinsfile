@@ -89,16 +89,16 @@ fi; \
 	}
 	catch (Exception e) {
 		currentBuild.result = 'FAILURE'
-		//echo e.toString()
+		echo e.toString()
 		throw e
 	}
 	finally {
 
 		if (currentBuild.result == 'FAILURE') {
-			echo "Build unsuccessfull"
+			echo "Build unsuccessfull :-("
 			//slack_notification("FAILURE", '#00FF00')
 		} else {
-			echo "Build successfull"
+			echo "Build successfull :-)"
 			//slack_notification("SUCCESS", '#FF0000')
 		}
 	}
