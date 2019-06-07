@@ -14,7 +14,7 @@ node('master'){
 				sh "scp -i ~/.ssh/grafana.pem ${keyfile} ubuntu@${remote_host}:/home/ubuntu/.ssh/id_rsa_sub"
 			}
 
-				def statusCode = sh (script: """ssh -i ~/.ssh/grafana.pem ubuntu@${remote_host} '
+			def statusCode = sh (script: """ssh -i ~/.ssh/grafana.pem ubuntu@${remote_host} '
 sudo rm -rf /opt/releases/*; \
 sudo rm -rf /opt/current-release; \
 sudo rm -rf /opt/previous-release; \
@@ -68,6 +68,7 @@ cd /var/www/ghost; \
 if ./start.sh; then \
 	echo "Build successful and doing clean-up"; \
 	sudo ls -dt /opt/releases/ghost-*/ | tail -n +6 | xargs sudo rm -rf; \
+	exit 0; \
 else \
 	echo "Build unsuccessful and starting rollback process"; \
 	sudo service nginx stop; \
@@ -77,14 +78,15 @@ else \
 		echo "/opt/previous-release is empty, nothing to rollback"; \
 	fi; \
 	sudo service nginx restart; \
+	exit 1; \
 fi; \
 # rm -rf ~/.ssh/id_rsa;'
 """, returnStatus: true)
 		
-		if(statusCode == 0)
-			currentBuild.result = 'SUCCESS'
-		else if(statusCode == 1)
-			currentBuild.result = 'FAILURE'
+			if(statusCode == 0)
+				currentBuild.result = 'SUCCESS'
+			else
+				currentBuild.result = 'FAILURE'
 		}
 	}
 	catch (Exception e) {
