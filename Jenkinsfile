@@ -90,7 +90,6 @@ fi; \
 	catch (Exception e) {
 		currentBuild.result = 'FAILURE'
 		echo e.toString()
-		throw e
 	}
 	finally {
 
