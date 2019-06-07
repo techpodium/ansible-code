@@ -15,10 +15,10 @@ node('master'){
 			}
 
 			def statusCode = sh (script: """ssh -i ~/.ssh/grafana.pem ubuntu@${remote_host} '
-sudo rm -rf /opt/releases/*; \
-sudo rm -rf /opt/current-release; \
-sudo rm -rf /opt/previous-release; \
-sudo rm -rf /var/www/ghost; \
+#sudo rm -rf /opt/releases/*; \
+#sudo rm -rf /opt/current-release; \
+#sudo rm -rf /opt/previous-release; \
+#sudo rm -rf /var/www/ghost; \
 
 sudo rm -rf /opt/ghost; \
 sudo mkdir -p /opt/ghost; \
@@ -60,9 +60,6 @@ sudo chown -R ubuntu:ubuntu /opt/current-release/; \
 
 sudo ln -sf /var/www/ghost/system/files/ghost.audiomack.com.conf /etc/nginx/sites-available/ghost.audiomack.com.conf; \
 sudo ln -sf /etc/nginx/sites-available/ghost.audiomack.com.conf /etc/nginx/sites-enabled/ghost.audiomack.com.conf; \
-
-sudo chown ubuntu:ubuntu /etc/nginx/sites-available/ghost.audiomack.com.conf
-sudo chown ubuntu:ubuntu /etc/nginx/sites-enabled/ghost.audiomack.com.conf
 sudo service nginx restart; \
 
 cd /var/www/ghost; \
