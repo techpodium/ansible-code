@@ -52,7 +52,6 @@ if [ ! -L /var/www/ghost ]; then \
 	sudo ln -sf /opt/current-release /var/www/ghost; \
 	sudo chown -R ubuntu:ubuntu /var/www/ghost; \
 	sudo chown -R ubuntu:ubuntu /var/www/ghost/; \
-	#sudo chown -R ubuntu:ubuntu /var/www/ghost/*; \
 fi; \
 
 sudo chown -R ubuntu:ubuntu /opt/current-release; \
@@ -79,10 +78,9 @@ else \
 	fi; \
 	sudo service nginx restart; \
 	exit 1; \
-fi; \
-# rm -rf ~/.ssh/id_rsa;'
+fi;'
 """, returnStatus: true)
-		
+
 			if(statusCode == 0)
 				currentBuild.result = 'SUCCESS'
 			else
