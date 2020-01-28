@@ -1,0 +1,6 @@
+---
+
+- src: https://github.com/webofmars/ansible-dummy.git
+  version: master
+  scm: git
+  name: ansible_dummy
